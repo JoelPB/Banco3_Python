@@ -187,21 +187,28 @@ def recuperar_conta_cliente(cliente):
     if not cliente.contas:
         print("\n" + "\033[33m" + "@@@ Cliente não possui conta! @@@" + "\033[0;0m")
         return
-    # FIXME: não permite escolher conta, fazer isso
+    
+    if len(cliente.contas) > 1:
+        return escolher_conta_cliente(cliente.contas)
+
     return cliente.contas[0]
 
 
+def escolher_conta_cliente(contas):
+    conta_numero = int(input("Digite o número da conta do cliente: "))
+
+    for conta in contas:
+        if conta.numero == conta_numero:
+            return conta
+
+    print("\033[33m" + "@@@ Esta conta não pertence ao cliente! @@@" + "\033[0;0m")
+    return
+
+
 def depositar(clientes):
-    cpf = input("Informe o CPF do cliente: ")
-    cliente = filtar_cliente(cpf, clientes)
+    cliente, conta = verificar_cliente_conta(clientes)
 
-    if not cliente:
-        print("\n" + "\033[33m" + "@@@ Cliente não encontrado! @@@" + "\033[0;0m")
-        return
-
-    conta = recuperar_conta_cliente(cliente)
-
-    if not conta:
+    if not cliente or not conta:
         return
 
     valor = float(input("Informe o valor depositado: "))
@@ -210,24 +217,32 @@ def depositar(clientes):
     cliente.realizar_transacao(conta, transacao)
 
 
-# FIXME: enxugar o sacar e o depósito, semelhantes
 def sacar(clientes):
-    cpf = input("Informe o CPF do cliente: ")
-    cliente = filtar_cliente(cpf, clientes)
+    cliente, conta = verificar_cliente_conta(clientes)
 
-    if not cliente:
-        print("\n" + "\033[33m" + "@@@ Cliente não encontrado! @@@" + "\033[0;0m")
-        return
-
-    conta = recuperar_conta_cliente(cliente)
-
-    if not conta:
+    if not cliente or not conta:
         return
 
     valor = float(input("Informe o valor saque: "))
     transacao = Saque(valor)
 
     cliente.realizar_transacao(conta, transacao)
+
+
+def verificar_cliente_conta(clientes):
+    cpf = input("Informe o CPF do cliente: ")
+    cliente = filtar_cliente(cpf, clientes)
+
+    if not cliente:
+        print("\n" + "\033[33m" + "@@@ Cliente não encontrado! @@@" + "\033[0;0m")
+        return None, None
+
+    conta = recuperar_conta_cliente(cliente)
+
+    if not conta:
+        return cliente, None
+
+    return cliente, conta
 
 
 def exibir_extrato(clientes):
